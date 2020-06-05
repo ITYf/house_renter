@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.ityf.dao.UserlistDao" >
+    <resultMap id="ApplyResultMap" type="top.ityf.domain.Userlist" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="user_id" property="user_id" jdbcType="INTEGER" />
+        <collection property="apply" ofType="top.ityf.domain.Apply">
+            <id property="id" column="apply_id"/>
+            <!--用户id已经在user对象中存在，此处可以不设置-->
+            <!-- <result property="userId" column="id"/> -->
+            <result property="house_id" column="house_id"/>
+            <result property="address" column="address"/>
+            <result property="area" column="area"/>
+            <result property="price" column="price"/>
+            <result property="status" column="status"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="ZuResultMap" type="top.ityf.domain.Userlist" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="user_id" property="user_id" jdbcType="INTEGER" />
+        <collection property="zulist" ofType="top.ityf.domain.Zulist">
+            <id property="zid" column="zid"/>
+            <!--用户id已经在user对象中存在，此处可以不设置-->
+            <!-- <result property="userId" column="id"/> -->
+            <result property="house_id" column="house_id"/>
+            <result property="address" column="address"/>
+            <result property="contract_id" column="contract_id"/>
+            <result property="price" column="price"/>
+            <result property="status" column="status"/>
+        </collection>
+
+    </resultMap>
+
+    <resultMap id="CheckoutResultMap" type="top.ityf.domain.Userlist" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="user_id" property="user_id" jdbcType="INTEGER" />
+        <collection property="checkout" ofType="top.ityf.domain.Checkout">
+            <id property="id" column="cid"/>
+            <!--用户id已经在user对象中存在，此处可以不设置-->
+            <!-- <result property="userId" column="id"/> -->
+            <result property="house_id" column="house_id"/>
+            <result property="address" column="address"/>
+            <result property="userlist_id" column="userlist_id"/>
+            <result property="status" column="status"/>
+        </collection>
+
+    </resultMap>
+    <resultMap id="ApplyoutResultMap" type="top.ityf.domain.Userlist" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="user_id" property="user_id" jdbcType="INTEGER" />
+        <collection property="applyout" ofType="top.ityf.domain.Applyout">
+            <id property="id" column="aoid"/>
+            <!--用户id已经在user对象中存在，此处可以不设置-->
+            <!-- <result property="userId" column="id"/> -->
+            <result property="house_id" column="house_id"/>
+            <result property="address" column="address"/>
+            <result property="userlist_id" column="userlist_id"/>
+
+            <result property="status" column="status"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="UserMap" type="top.ityf.domain.Userlist" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="name" property="name" jdbcType="VARCHAR" />
+        <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="user_id" property="user_id" jdbcType="INTEGER" />
+        <association property="user" javaType="top.ityf.domain.User">
+            <!-- column:user表的主键对应的列  property：user对象中id属性-->
+            <id column="id" property="id"/>
+            <result column="username" property="username"/>
+            <result column="password" property="password"/>
+        </association>
+    </resultMap>
+
+
+    <delete id="deleteUser" parameterType="Integer">
+        delete from user where id=#{id}
+    </delete>
+
+    <delete id="deleteUserlist" parameterType="Integer">
+        delete from userlist where user_id=#{id}
+    </delete>
+
+    <!-- 联合查询 -->
+    <select id="findAllUserlist" resultMap="UserMap">
+        SELECT u.*, ul.* FROM `user` u , userlist ul where u.id = ul.user_id and u.type='zuke'
+    </select>
+
+    <select id="findHasUserlist" parameterType="Integer" resultType="top.ityf.domain.Userlist">
+        select * from userlist where user_id=#{user_id}
+    </select>
+
+    <select id="checkUserlist" parameterType="String" resultType="top.ityf.domain.Userlist">
+        select * from userlist where idcard=#{idcard}
+    </select>
+
+    <insert id="insertUserlist" parameterType="top.ityf.domain.Userlist">
+        insert into userlist(name,idcard,phone,user_id)
+        values(#{name},#{idcard},#{phone},#{user_id})
+    </insert>
+
+
+    <select id="findUserlistUpdate" parameterType="top.ityf.domain.Userlist" resultType="top.ityf.domain.Userlist">
+        select * from userlist where idcard=#{idcard} and id!=#{id}
+    </select>
+
+    <update id="updateUserlist" parameterType="top.ityf.domain.Userlist">
+        update userlist set name=#{name},idcard=#{idcard},phone=#{phone} where id=#{id}
+    </update>
+
+    <select id="getUserZuList" resultMap="ZuResultMap" parameterType="Integer">
+        SELECT u.*, z.* FROM `userlist` u , zulist z where u.id = z.userlist_id and u.id=#{id}
+    </select>
+
+    <select id="getMyCheckout" resultMap="CheckoutResultMap" parameterType="Integer">
+        SELECT u.*, c.* FROM `userlist` u , checkout c where u.id = c.userlist_id and u.id=#{id}
+    </select>
+
+    <select id="getMyApply" resultMap="ApplyResultMap" parameterType="Integer">
+        SELECT u.*, a.* FROM `userlist` u , apply a where u.id = a.userlist_id and u.id=#{id}
+    </select>
+
+    <select id="getMyApplyout" resultMap="ApplyoutResultMap" parameterType="Integer">
+        SELECT u.*, a.* FROM `userlist` u , applyout a where u.id = a.userlist_id and u.id=#{id}
+    </select>
+</mapper>
